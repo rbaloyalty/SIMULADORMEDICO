@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<title>Simulador de Tributação - Clínica Médica</title>
+<style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #2c3e50; }
+        label, input { display: block; margin: 20px 0; }
+        .result { margin-top: 20px; padding: 20px; background-color: #ecf0f1; border-radius: 5px; }
+    </style>
+</head>
+<body>
+<h1>Simulador de Tributação - Clínica Médica - VALORES ESTIMADOS</h1>
+<label for="faturamento">Faturamento PARTICULAR Total (R$):</label>
+<input id="faturamento" placeholder="Faturamento total particular" type="number"/>
+<label for="consultas">Quantidade de Consultas PARTICULARES:</label>
+<input id="consultas" placeholder="Consultas Particulares" type="number"/>
+<button onclick="calcularTributacao()">Calcular Tributação</button>
+<div class="result" id="resultado"></div>
+<script>
+    function calcularTributacao() {
+        var faturamento = parseFloat(document.getElementById('faturamento').value);
+        var consultas = parseInt(document.getElementById('consultas').value);
+
+        if (isNaN(faturamento) || isNaN(consultas) || consultas <= 0) {
+            alert("Por favor, informe valores válidos.");
+            return;
+        }
+
+        var pj = faturamento * 0.4;
+        var pf = faturamento * 0.6;
+
+        var tribMin = pj * 0.06 + pf * 0.005;
+        var tribMax = pj * 0.1633 + pf * 0.005;
+
+        var percMin = (tribMin / faturamento) * 100;
+        var percMax = (tribMax / faturamento) * 100;
+
+        var valorMedioConsulta = faturamento / consultas;
+
+        // Economia teórica
+        var economiaMinima = (0.06 * faturamento) - tribMin;
+        var economiaMaxima = (0.1633 * faturamento) - tribMax;
+
+        var economiaMinimaPerc = (economiaMinima / faturamento) * 100;
+        var economiaMaximaPerc = (economiaMaxima / faturamento) * 100;
+
+        function calcularValorSugerido(valor, economiaPerc) {
+            let reducaoPerc = 0;
+            if (economiaPerc <= 6) {
+                reducaoPerc = 6;
+            } else if (economiaPerc > 6 && economiaPerc <= 10) {
+                reducaoPerc = economiaPerc;
+            } else {
+                reducaoPerc = 12;
+            }
+            return valor * (1 - reducaoPerc / 100);
+        }
+
+        var valorSugeridoMin = calcularValorSugerido(valorMedioConsulta, economiaMinimaPerc);
+        var valorSugeridoMax = calcularValorSugerido(valorMedioConsulta, economiaMaximaPerc);
+
+        document.getElementById('resultado').innerHTML =
+            "<strong>Tributação Total Mínima:</strong> R$ " + tribMin.toFixed(2) + " (" + percMin.toFixed(2) + "%)<br>" +
+            "<strong>Tributação Total Máxima:</strong> R$ " + tribMax.toFixed(2) + " (" + percMax.toFixed(2) + "%)<br><br>" +
+            "<strong>Valor Médio da Consulta:</strong> R$ " + valorMedioConsulta.toFixed(2) + "<br>" +
+            "<strong>Valor Sugerido da Consulta (máximo):</strong> R$ " + valorSugeridoMin.toFixed(2) + "<br>" +
+            "<strong>Valor Sugerido da Consulta (mínimo):</strong> R$ " + valorSugeridoMax.toFixed(2);
+    }
+    </script>
+</body>
+</html>
